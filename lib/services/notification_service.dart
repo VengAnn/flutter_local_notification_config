@@ -80,9 +80,9 @@ class NotificationService {
     return true;
   }
 
-  /// Notification details
-  NotificationDetails _notificationDetails() {
-    return const NotificationDetails(
+  /// Notification details with custom sound from assets
+  NotificationDetails _notificationDetails({String soundName = 'beep'}) {
+    return NotificationDetails(
       android: AndroidNotificationDetails(
         'default_channel_id',
         'General Notifications',
@@ -90,39 +90,46 @@ class NotificationService {
         importance: Importance.high,
         priority: Priority.high,
         playSound: true,
+        sound: RawResourceAndroidNotificationSound(soundName),
+        enableVibration: true,
+        vibrationPattern: Int64List.fromList([0, 250, 250, 250]),
       ),
       iOS: DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
+        // in ios need full file name with extension (e.g., chime.wav)
+        sound: 'ping.wav', // file name only
       ),
     );
   }
 
-  /// Show immediate notification
+  /// Show immediate notification with custom sound
   Future<void> showNotification({
     required int id,
     String? title,
     String? body,
     String? payload,
+    String soundName = 'beep',
   }) async {
     await notificationPlugin.show(
       id,
       title,
       body,
-      _notificationDetails(),
+      _notificationDetails(soundName: soundName),
       payload: payload,
     );
-    log('✅ Immediate notification shown (ID: $id)');
+    log('✅ Immediate notification shown (ID: $id) - Sound: $soundName');
   }
 
-  /// Schedule one-time notification
+  /// Schedule one-time notification with custom sound
   Future<void> scheduleOnce({
     required int id,
     required String title,
     required String body,
     required DateTime dateTime,
     String? payload,
+    String soundName = 'beep',
   }) async {
     try {
       bool hasPermission = await hasNotificationPermission();
@@ -143,12 +150,12 @@ class NotificationService {
         title,
         body,
         tzDateTime,
-        _notificationDetails(),
+        _notificationDetails(soundName: soundName),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: payload,
       );
       log(
-        '✅ Scheduled notification (ID: $id) - fires in $secondsUntil seconds',
+        '✅ Scheduled notification (ID: $id) - fires in $secondsUntil seconds - Sound: $soundName',
       );
     } catch (e) {
       log('❌ Error scheduling notification: $e');
@@ -156,7 +163,7 @@ class NotificationService {
     }
   }
 
-  /// Schedule daily notification
+  /// Schedule daily notification with custom sound
   Future<void> scheduleDaily({
     required int id,
     required String title,
@@ -164,6 +171,7 @@ class NotificationService {
     required int hour,
     required int minute,
     String? payload,
+    String soundName = 'beep',
   }) async {
     try {
       final now = tz.TZDateTime.now(_localLocation);
@@ -185,19 +193,21 @@ class NotificationService {
         title,
         body,
         scheduleDate,
-        _notificationDetails(),
+        _notificationDetails(soundName: soundName),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: payload,
       );
-      log('✅ Daily notification scheduled (ID: $id) at $hour:$minute');
+      log(
+        '✅ Daily notification scheduled (ID: $id) at $hour:$minute - Sound: $soundName',
+      );
     } catch (e) {
       log('❌ Error scheduling daily notification: $e');
       rethrow;
     }
   }
 
-  /// Schedule weekly notification
+  /// Schedule weekly notification with custom sound
   Future<void> scheduleWeekly({
     required int id,
     required String title,
@@ -206,6 +216,7 @@ class NotificationService {
     required int hour,
     required int minute,
     String? payload,
+    String soundName = 'beep',
   }) async {
     try {
       final now = tz.TZDateTime.now(_localLocation);
@@ -233,13 +244,13 @@ class NotificationService {
           title,
           body,
           scheduleDate,
-          _notificationDetails(),
+          _notificationDetails(soundName: soundName),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
           payload: payload,
         );
       }
-      log('✅ Weekly notification scheduled (ID: $id)');
+      log('✅ Weekly notification scheduled (ID: $id) - Sound: $soundName');
     } catch (e) {
       log('❌ Error scheduling weekly notification: $e');
       rethrow;
