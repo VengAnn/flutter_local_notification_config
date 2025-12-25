@@ -38,12 +38,31 @@ class NotificationService {
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // iOS settings
-    const DarwinInitializationSettings iosSettings =
+    // iOS settings with notification categories
+    final DarwinInitializationSettings iosSettings =
         DarwinInitializationSettings(
           requestAlertPermission: true,
           requestBadgePermission: true,
           requestSoundPermission: true,
+          // iOS notification categories for actions
+          notificationCategories: [
+            DarwinNotificationCategory(
+              'general',
+              actions: [
+                DarwinNotificationAction.plain('view', 'View'),
+                DarwinNotificationAction.plain('dismiss', 'Dismiss'),
+                DarwinNotificationAction.plain(
+                  'reply',
+                  'Reply',
+                  options: {DarwinNotificationActionOption.foreground},
+                ),
+              ],
+              options: {
+                DarwinNotificationCategoryOption.allowInCarPlay,
+                DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
+              },
+            ),
+          ],
         );
 
     final InitializationSettings initSettings = InitializationSettings(

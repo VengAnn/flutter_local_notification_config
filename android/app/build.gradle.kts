@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.flutter_notification_tester"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35 // Required minimum for flutter_local_notifications
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -32,6 +32,13 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
+            // Enable ProGuard/R8 for release builds
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
